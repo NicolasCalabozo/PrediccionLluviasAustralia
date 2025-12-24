@@ -1,0 +1,12 @@
+{
+    "n_estimators": 281,
+    "max_depth": 34,
+    "min_samples_split": 7,
+    "min_samples_leaf": 3,
+    "max_features": "log2",
+    "criterion": "gini",
+    "bootstrap": false,
+    "class_weight": "balanced",
+    "n_jobs": -1,
+    "random_state": 42
+}
