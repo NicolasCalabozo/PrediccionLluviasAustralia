@@ -11,7 +11,7 @@ from sklearn.metrics import precision_recall_curve, f1_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import HistGradientBoostingClassifier
 
-class RedLluviaPipeline(BaseEstimator, ClassifierMixin):
+class RedLluvia(BaseEstimator, ClassifierMixin):
     def __init__(self, learning_rate=0.001, epochs=100, batch_size=128,
                  capas_ocultas=[64, 32], dropout_rate=0.25, random_state=None):
 
