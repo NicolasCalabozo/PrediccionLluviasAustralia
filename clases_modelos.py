@@ -84,7 +84,7 @@ class RedLluviaPipeline(BaseEstimator, ClassifierMixin):
 
     def predict_proba(self, X):
         """
-        CORREGIDO: Devuelve forma (n_samples, 2) compatible con Scikit-Learn.
+        Devuelve forma compatible con Scikit-Learn.
         Col 0: Probabilidad No Lluvia
         Col 1: Probabilidad Lluvia
         """
