@@ -81,7 +81,30 @@ with st.form("form_datos_api"):
 
 # --- LÓGICA DE ENVÍO A LA API ---
 if submit_btn:
-    # ... (creación de datos_a_enviar igual) ...
+    datos_a_enviar = {
+        "Date": str(fecha_input),
+        "Location": location_input,
+        "RainToday": rain_today_input,
+        "MinTemp": min_temp,
+        "MaxTemp": max_temp,
+        "Rainfall": rainfall_input,
+        "Evaporation": evaporation,
+        "Sunshine": sunshine,
+        "WindGustDir": wind_gust_dir,
+        "WindGustSpeed": wind_gust_speed,
+        "WindDir9am": wind_dir9,
+        "WindDir3pm": wind_dir3,
+        "WindSpeed9am": wind_speed9,
+        "WindSpeed3pm": wind_speed3,
+        "Humidity9am": humidity9,
+        "Humidity3pm": humidity3,
+        "Pressure9am": pressure9,
+        "Pressure3pm": pressure3,
+        "Cloud9am": cloud9,
+        "Cloud3pm": cloud3,
+        "Temp9am": temp9am,
+        "Temp3pm": temp3pm
+    }
 
     try:
         with st.spinner('Consultando al Comité de IA (RF, HGB, NN)...'):
@@ -125,10 +148,10 @@ if submit_btn:
                         st.progress(detalles["Gradient Boosting"])
                         st.write(f"**{detalles['Gradient Boosting']*100:.1f}%**")
                         
-                    with c3:
-                        st.info("🧠 Red Neuronal")
-                        st.progress(detalles["Red Neuronal"])
-                        st.write(f"**{detalles['Red Neuronal']*100:.1f}%**")
+                    #with c3:
+                        #st.info("🧠 Red Neuronal")
+                        #st.progress(detalles["Red Neuronal"])
+                        #st.write(f"**{detalles['Red Neuronal']*100:.1f}%**")
 
         else:
             st.error("Error de conexión con el servidor.")

@@ -16,7 +16,7 @@ app = FastAPI()
 try:
     rf_model = joblib.load("modelo_random_forest.pkl")
     hgb_model = joblib.load("modelo_hist_gradient_boosting_classifier.pkl")
-    nn_model = joblib.load("modelo_red_neuronal.pkl")
+    #nn_model = joblib.load("modelo_red_neuronal.pkl")
     print("✅ Todos los modelos cargados correctamente.")
 except Exception as e:
     print(f"❌ Error cargando modelos: {e}")
@@ -59,10 +59,10 @@ def predecir_todo(datos: InputClima):
         # Hacemos las 3 predicciones
         prob_rf = rf_model.predict_proba(df_input)[0][1]
         prob_hgb = hgb_model.predict_proba(df_input)[0][1]
-        prob_nn = nn_model.predict_proba(df_input)[0][1]
+        #prob_nn = nn_model.predict_proba(df_input)[0][1]
 
         # Calculamos un "Consenso" (Promedio simple)
-        promedio = (prob_rf + prob_hgb + prob_nn) / 3
+        promedio = (prob_rf + prob_hgb) / 2
 
         return {
             "status": "ok",
@@ -73,7 +73,7 @@ def predecir_todo(datos: InputClima):
             "detalle": {
                 "Random Forest": float(prob_rf),
                 "Gradient Boosting": float(prob_hgb),
-                "Red Neuronal": float(prob_nn)
+                #"Red Neuronal": float(prob_nn)
             }
         }
     except Exception as e:
