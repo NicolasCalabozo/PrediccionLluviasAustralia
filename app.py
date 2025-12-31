@@ -37,26 +37,6 @@ def cargar_pipeline(nombre_archivo):
         st.error(f"Error al cargar el modelo: {e}")
         return None
 
-# --- Sidebar ---
-with st.sidebar:
-    st.header("Configuración del Modelo")
-    modelo_seleccionado = st.selectbox(
-        "Algoritmo de Predicción",
-        [
-            "Random Forest", 
-            "Hist Gradient Boosting", 
-            "Red Neuronal"
-        ]
-    )
-    
-    archivos_modelos = {
-        "Random Forest": "modelo_random_forest.pkl",
-        "Hist Gradient Boosting": "modelo_hist_gradient_boosting_classifier.pkl",
-        "Red Neuronal": "modelo_red_neuronal.pkl"
-    }
-    
-    archivo_a_cargar = archivos_modelos[modelo_seleccionado]
-
 # --- 1. LISTAS DE OPCIONES ---
 lista_locaciones = [
     'Albury', 'BadgerysCreek', 'Cobar', 'CoffsHarbour', 'Moree', 'Newcastle',
@@ -81,7 +61,7 @@ lista_locaciones_form = opcion_vacia + lista_locaciones
 lista_direcciones_form = opcion_vacia + lista_direcciones
 opciones_si_no = opcion_vacia + ["No", "Yes"]
 
-# --- 2. EL FORMULARIO ---
+# --- 2. EL FORMULARIO (Versión Compatible Streamlit 1.12.2) ---
 with st.form("form_datos_completos"):
     st.markdown("### 📝 Ingreso de Datos Meteorológicos")
 
@@ -91,130 +71,150 @@ with st.form("form_datos_completos"):
         with col1:
             fecha_input = st.date_input("Date (Fecha)", value=datetime.date.today())
         with col2:
-            # Quitamos index=None y placeholder
             location_input = st.selectbox("Location (Ubicación)", lista_locaciones_form)
         with col3:
             rain_today_input = st.selectbox("RainToday (¿Llovió hoy?)", opciones_si_no)
 
-    # B) TEMPERATURA
+    # B) TEMPERATURA 
+    # Usamos st.text_input y value="" (cadena vacía)
+    # IMPORTANTE: No usar 'format' aquí.
     with st.expander("🌡️ Temperaturas"):
         t1, t2, t3, t4 = st.columns(4)
-        with t1: min_temp = st.number_input("MinTemp", value=None, format="%.1f")
-        with t2: max_temp = st.number_input("MaxTemp", value=None, format="%.1f")
-        with t3: temp9am = st.number_input("Temp9am", value=None, format="%.1f")
-        with t4: temp3pm = st.number_input("Temp3pm", value=None, format="%.1f")
+        with t1: min_temp = st.text_input("MinTemp", value="")
+        with t2: max_temp = st.text_input("MaxTemp", value="")
+        with t3: temp9am = st.text_input("Temp9am", value="")
+        with t4: temp3pm = st.text_input("Temp3pm", value="")
 
     # C) VIENTO
     with st.expander("💨 Viento (Dirección y Velocidad)"):
-        st.markdown("Si no tienes un dato, déjalo en 'Seleccionar...' o vacío.")
+        st.markdown("Si no tienes un dato, déjalo vacío.")
         w1, w2 = st.columns(2)
         with w1:
             wind_gust_dir = st.selectbox("WindGustDir (Dir. Ráfaga)", lista_direcciones_form)
         with w2:
-            wind_gust_speed = st.number_input("WindGustSpeed (Vel. Ráfaga)", value=None, format="%.1f")
+            wind_gust_speed = st.text_input("WindGustSpeed (Vel. Ráfaga)", value="")
         
         st.markdown("---")
         wa, wb, wc, wd = st.columns(4)
         with wa: wind_dir9 = st.selectbox("WindDir9am", lista_direcciones_form)
-        with wb: wind_speed9 = st.number_input("WindSpeed9am", value=None, format="%.1f")
+        with wb: wind_speed9 = st.text_input("WindSpeed9am", value="")
         with wc: wind_dir3 = st.selectbox("WindDir3pm", lista_direcciones_form)
-        with wd: wind_speed3 = st.number_input("WindSpeed3pm", value=None, format="%.1f")
+        with wd: wind_speed3 = st.text_input("WindSpeed3pm", value="")
 
     # D) HUMEDAD, PRESIÓN Y NUBES
     with st.expander("💧 Humedad, Presión y Otros"):
         h1, h2, p1, p2 = st.columns(4)
-        # Usamos number_input en vez de slider para permitir vacíos
-        with h1: humidity9 = st.number_input("Humidity9am (%)", min_value=0, max_value=100, step=1, value=None)
-        with h2: humidity3 = st.number_input("Humidity3pm (%)", min_value=0, max_value=100, step=1, value=None)
-        with p1: pressure9 = st.number_input("Pressure9am (hPa)", value=None, format="%.1f")
-        with p2: pressure3 = st.number_input("Pressure3pm (hPa)", value=None, format="%.1f")
+        with h1: humidity9 = st.text_input("Humidity9am (%)", value="")
+        with h2: humidity3 = st.text_input("Humidity3pm (%)", value="")
+        with p1: pressure9 = st.text_input("Pressure9am (hPa)", value="")
+        with p2: pressure3 = st.text_input("Pressure3pm (hPa)", value="")
         
         c1, c2, sun, evap = st.columns(4)
-        with c1: cloud9 = st.number_input("Cloud9am (octas)", min_value=0, max_value=9, step=1, value=None)
-        with c2: cloud3 = st.number_input("Cloud3pm (octas)", min_value=0, max_value=9, step=1, value=None)
-        with sun: sunshine = st.number_input("Sunshine (horas)", value=None, format="%.1f")
-        with evap: evaporation = st.number_input("Evaporation (mm)", value=None, format="%.1f")
+        with c1: cloud9 = st.text_input("Cloud9am (octas 0-9)", value="")
+        with c2: cloud3 = st.text_input("Cloud3pm (octas 0-9)", value="")
+        with sun: sunshine = st.text_input("Sunshine (horas)", value="")
+        with evap: evaporation = st.text_input("Evaporation (mm)", value="")
         
-        rainfall_input = st.number_input("Rainfall (Lluvia acumulada hoy mm)", value=None, format="%.2f")
+        rainfall_input = st.text_input("Rainfall (Lluvia acumulada hoy mm)", value="")
 
+    # --- BOTÓN DE ENVÍO (DENTRO DEL FORM) ---
+    # Esto soluciona el error "Missing Submit Button"
     submit_btn = st.form_submit_button("Realizar Predicción")
 
 # --- Lógica de Predicción ---
 if submit_btn:
-    pipeline = cargar_pipeline(archivo_a_cargar)
+    # 1. Construir DataFrame inicial (Esto se hace UNA sola vez para los 3 modelos)
+    input_data = pd.DataFrame({
+        'Date': [pd.to_datetime(fecha_input)],
+        'Location': [location_input],
+        'MinTemp': [min_temp],
+        'MaxTemp': [max_temp],
+        'Rainfall': [rainfall_input],
+        'Evaporation': [evaporation],
+        'Sunshine': [sunshine],
+        'WindGustDir': [wind_gust_dir],
+        'WindGustSpeed': [wind_gust_speed],
+        'WindDir9am': [wind_dir9],
+        'WindDir3pm': [wind_dir3],
+        'WindSpeed9am': [wind_speed9],
+        'WindSpeed3pm': [wind_speed3],
+        'Humidity9am': [humidity9],
+        'Humidity3pm': [humidity3],
+        'Pressure9am': [pressure9],
+        'Pressure3pm': [pressure3],
+        'Cloud9am': [cloud9],
+        'Cloud3pm': [cloud3],
+        'Temp9am': [temp9am],
+        'Temp3pm': [temp3pm],
+        'RainToday': [rain_today_input]
+    })
+
+    # --- LIMPIEZA DE DATOS (Común para todos) ---
+    # 1. Reemplazar "Seleccionar..." por np.nan
+    input_data = input_data.replace("Seleccionar...", np.nan)
     
-    if pipeline:
-        # Construir DataFrame inicial
-        input_data = pd.DataFrame({
-            'Date': [pd.to_datetime(fecha_input)],
-            'Location': [location_input],
-            'MinTemp': [min_temp],
-            'MaxTemp': [max_temp],
-            'Rainfall': [rainfall_input],
-            'Evaporation': [evaporation],
-            'Sunshine': [sunshine],
-            'WindGustDir': [wind_gust_dir],
-            'WindGustSpeed': [wind_gust_speed],
-            'WindDir9am': [wind_dir9],
-            'WindDir3pm': [wind_dir3],
-            'WindSpeed9am': [wind_speed9],
-            'WindSpeed3pm': [wind_speed3],
-            'Humidity9am': [humidity9],
-            'Humidity3pm': [humidity3],
-            'Pressure9am': [pressure9],
-            'Pressure3pm': [pressure3],
-            'Cloud9am': [cloud9],
-            'Cloud3pm': [cloud3],
-            'Temp9am': [temp9am],
-            'Temp3pm': [temp3pm],
-            'RainToday': [rain_today_input]
-        })
+    # 2. Reemplazar strings vacíos y espacios por np.nan
+    input_data = input_data.replace(r'^\s*$', np.nan, regex=True)
+    
+    # 3. Conversión de Tipos Numéricos
+    lista_columnas_numericas = [
+        'MinTemp', 'MaxTemp', 'Rainfall', 'Evaporation', 'Sunshine',
+        'WindGustSpeed', 'WindSpeed9am', 'WindSpeed3pm',
+        'Humidity9am', 'Humidity3pm', 'Pressure9am', 'Pressure3pm',
+        'Cloud9am', 'Cloud3pm', 'Temp9am', 'Temp3pm'
+    ]
+    
+    for col in lista_columnas_numericas:
+        input_data[col] = pd.to_numeric(input_data[col], errors='coerce')
 
-        # --- CORRECCIONES CLAVE PARA EL BACKEND ---
-        
-        # 1. Reemplazar "Seleccionar..." por np.nan (Para tus selectbox antiguos)
-        input_data = input_data.replace("Seleccionar...", np.nan)
-        
-        # 2. Reemplazar strings vacíos y espacios por np.nan
-        input_data = input_data.replace(r'^\s*$', np.nan, regex=True)
-        
-        # 3. Conversión de Tipos Numéricos (Explícito)
-        # Definimos explícitamente qué columnas son números para forzar la conversión
-        lista_columnas_numericas = [
-            'MinTemp', 'MaxTemp', 'Rainfall', 'Evaporation', 'Sunshine',
-            'WindGustSpeed', 'WindSpeed9am', 'WindSpeed3pm',
-            'Humidity9am', 'Humidity3pm', 'Pressure9am', 'Pressure3pm',
-            'Cloud9am', 'Cloud3pm', 'Temp9am', 'Temp3pm'
-        ]
-        
-        for col in lista_columnas_numericas:
-            # errors='coerce' transformará None y strings raros en NaN
-            input_data[col] = pd.to_numeric(input_data[col], errors='coerce')
+    # --- PREDICCIÓN MÚLTIPLE ---
+    try:
+        with st.spinner('Consultando a los 3 modelos...'):
+            # Cargamos los 3 pipelines explícitamente
+            rf_pipeline = cargar_pipeline("modelo_random_forest.pkl")
+            hgb_pipeline = cargar_pipeline("modelo_hist_gradient_boosting_classifier.pkl")
+            nn_pipeline = cargar_pipeline("modelo_red_neuronal.pkl")
 
-        try:
-            with st.spinner('Procesando datos y generando predicción...'):
+            # Verificamos que cargaron bien
+            if rf_pipeline is None or hgb_pipeline is None or nn_pipeline is None:
+                st.error("Error: No se pudieron cargar los archivos .pkl. Verifica que estén en la carpeta.")
+            else:
+                # Cada modelo hace su predicción sobre los mismos datos
+                prob_rf = rf_pipeline.predict_proba(input_data)[0][1]
+                prob_hgb = hgb_pipeline.predict_proba(input_data)[0][1]
+                prob_nn = nn_pipeline.predict_proba(input_data)[0][1]
+
+                # --- MOSTRAR RESULTADOS ---
+                st.markdown("### 📊 Resultados del Consenso de Modelos")
                 
-                # Predicción
-                prediccion = pipeline.predict(input_data)[0]
-                probs = pipeline.predict_proba(input_data)[0]
-                prob_lluvia = probs[1] # Probabilidad de "Yes"
+                col_a, col_b, col_c = st.columns(3)
 
-            # Mostrar Resultados
-            st.markdown("---")
-            col_res1, col_res2 = st.columns([1, 2])
-            
-            with col_res1:
-                st.metric("Probabilidad de Lluvia", f"{prob_lluvia*100:.1f}%")
-            
-            with col_res2:
-                if prob_lluvia > 0.5:
-                    st.error(f"🌧️ **Alta probabilidad de lluvia** detectada con {modelo_seleccionado}.")
+                with col_a:
+                    st.info("🌲 Random Forest")
+                    st.metric("Probabilidad", f"{prob_rf*100:.1f}%")
+                    if prob_rf > 0.5: st.warning("Lluvia")
+                    else: st.success("Sin Lluvia")
+
+                with col_b:
+                    st.info("🚀 Gradient Boosting")
+                    st.metric("Probabilidad", f"{prob_hgb*100:.1f}%")
+                    if prob_hgb > 0.5: st.warning("Lluvia")
+                    else: st.success("Sin Lluvia")
+
+                with col_c:
+                    st.info("🧠 Red Neuronal")
+                    st.metric("Probabilidad", f"{prob_nn*100:.1f}%")
+                    if prob_nn > 0.5: st.warning("Lluvia")
+                    else: st.success("Sin Lluvia")
+
+                # Conclusión final (Promedio)
+                promedio = (prob_rf + prob_hgb + prob_nn) / 3
+                st.markdown("---")
+                if promedio > 0.5:
+                    st.error(f"🚨 **Conclusión Final:** El consenso de modelos indica una alta probabilidad ({promedio*100:.1f}%) de lluvia.")
                 else:
-                    st.success(f"☀️ **Baja probabilidad de lluvia** detectada con {modelo_seleccionado}.")
-                
-                st.progress(int(prob_lluvia*100))
+                    st.balloons()
+                    st.success(f"☀️ **Conclusión Final:** El consenso de modelos indica que es poco probable ({promedio*100:.1f}%) que llueva.")
 
-        except Exception as e:
-            st.error("Ocurrió un error en el pipeline:")
-            st.code(e)
-            st.info("Verifica que las columnas coincidan y que los archivos .pkl y shapefiles estén accesibles.")
+    except Exception as e:
+        st.error(f"Ocurrió un error inesperado durante la predicción: {e}")
