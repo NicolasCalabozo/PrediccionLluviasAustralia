@@ -11,15 +11,18 @@ from sklearn.metrics import precision_recall_curve, f1_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import HistGradientBoostingClassifier
 
-class RedLluviaPipeline(BaseEstimator, ClassifierMixin):
+class RedLluvia(BaseEstimator, ClassifierMixin):
     def __init__(self, learning_rate=0.001, epochs=100, batch_size=128,
-                 capas_ocultas=[64, 32], dropout_rate=0.25, random_state=None):
+                 capas_ocultas=[64, 32], dropout_rate=0.25, 
+                 use_batch_norm=True, # <--- NUEVO PARÁMETRO
+                 random_state=42):
 
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.batch_size = batch_size
         self.capas_ocultas = capas_ocultas
         self.dropout_rate = dropout_rate
+        self.use_batch_norm = use_batch_norm # <--- Guardamos esto
         self.random_state = random_state
         
         # Estado interno
@@ -100,18 +103,35 @@ class RedLluviaPipeline(BaseEstimator, ClassifierMixin):
 
     def _construir_modelo(self, input_dim):
         self.model_ = models.Sequential()
+        
         for i, neuronas in enumerate(self.capas_ocultas):
             seed_capa = self.random_state + i if self.random_state else None
+            
+            # 1. Capa Densa (Sin activación aún si usamos BatchNorm)
             if i == 0:
-                self.model_.add(layers.Dense(neuronas, activation='relu', input_shape=(input_dim,)))
+                self.model_.add(layers.Dense(neuronas, input_shape=(input_dim,), use_bias=not self.use_batch_norm))
             else:
-                self.model_.add(layers.Dense(neuronas, activation='relu'))
+                self.model_.add(layers.Dense(neuronas, use_bias=not self.use_batch_norm))
+            
+            # 2. Batch Normalization (Tal cual lo hiciste en Optuna)
+            if self.use_batch_norm:
+                self.model_.add(layers.BatchNormalization())
+            
+            # 3. Activación
+            self.model_.add(layers.Activation('relu'))
+            
+            # 4. Dropout
             self.model_.add(layers.Dropout(self.dropout_rate, seed=seed_capa))
 
+        # Capa de Salida
         self.model_.add(layers.Dense(1, activation='sigmoid'))
         
         optimizador = optimizers.Adam(learning_rate=self.learning_rate)
-        self.model_.compile(optimizer=optimizador, loss='binary_crossentropy', metrics=['accuracy'])
+        
+        # OJO: En optuna usaste recall y precision en metrics, agrégalos aquí si quieres consistencia
+        metrics = ['accuracy', tf.keras.metrics.Recall(name='recall'), tf.keras.metrics.Precision(name='precision')]
+        
+        self.model_.compile(optimizer=optimizador, loss='binary_crossentropy', metrics=metrics)
 
     # --- SERIALIZACIÓN (NECESARIA PARA GUARDAR EL PIPELINE ENTRENADO) ---
     def __getstate__(self):
