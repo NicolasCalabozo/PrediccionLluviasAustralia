@@ -1,14 +1,14 @@
 import streamlit as st
 import datetime
-import requests  # <--- Esta es la clave para hablar con la API
+import requests
 
-# --- Configuración de Página ---
-st.set_page_config(page_title="Predicción Lluvia Australia (Cliente API)", layout="wide")
+#Configuración de Página
+st.set_page_config(page_title = "Predicción Lluvia Australia", layout = "wide")
 
-st.title("🌧️ Sistema de Predicción (Modo Cliente API)")
+st.title("Sistema de Predicción")
 st.markdown("Esta interfaz es ligera. Los cálculos pesados los hace el servidor (FastAPI).")
 
-# --- LISTAS DE OPCIONES ---
+#LISTAS DE OPCIONES
 lista_locaciones = [
     'Albury', 'BadgerysCreek', 'Cobar', 'CoffsHarbour', 'Moree', 'Newcastle',
     'NorahHead', 'NorfolkIsland', 'Penrith', 'Richmond', 'Sydney', 'SydneyAirport',
@@ -30,27 +30,27 @@ lista_locaciones_form = opcion_vacia + lista_locaciones
 lista_direcciones_form = opcion_vacia + lista_direcciones
 opciones_si_no = opcion_vacia + ["No", "Yes"]
 
-# --- FORMULARIO ---
+#FORMULARIO
 with st.form("form_datos_api"):
-    st.markdown("### 📝 Ingreso de Datos")
+    st.markdown("### Ingreso de Datos")
 
-    # A) DATOS GENERALES
-    with st.expander("📍 Datos Básicos (Obligatorios)", expanded=True):
+    #DATOS GENERALES
+    with st.expander("Datos Básicos (Obligatorios)", expanded = True):
         col1, col2, col3 = st.columns(3)
         with col1: fecha_input = st.date_input("Fecha", value=datetime.date.today())
         with col2: location_input = st.selectbox("Ubicación", lista_locaciones_form)
         with col3: rain_today_input = st.selectbox("¿Llovió hoy?", opciones_si_no)
 
-    # B) TEMPERATURA 
-    with st.expander("🌡️ Temperaturas"):
+    #TEMPERATURA 
+    with st.expander("Temperaturas"):
         t1, t2, t3, t4 = st.columns(4)
         with t1: min_temp = st.text_input("MinTemp", value="")
         with t2: max_temp = st.text_input("MaxTemp", value="")
         with t3: temp9am = st.text_input("Temp9am", value="")
         with t4: temp3pm = st.text_input("Temp3pm", value="")
 
-    # C) VIENTO
-    with st.expander("💨 Viento"):
+    #VIENTO
+    with st.expander("Viento"):
         w1, w2 = st.columns(2)
         with w1: wind_gust_dir = st.selectbox("Dir. Ráfaga", lista_direcciones_form)
         with w2: wind_gust_speed = st.text_input("Vel. Ráfaga", value="")
@@ -61,8 +61,8 @@ with st.form("form_datos_api"):
         with wc: wind_dir3 = st.selectbox("WindDir3pm", lista_direcciones_form)
         with wd: wind_speed3 = st.text_input("WindSpeed3pm", value="")
 
-    # D) OTROS
-    with st.expander("💧 Otros"):
+    #OTROS
+    with st.expander("Otros"):
         h1, h2, p1, p2 = st.columns(4)
         with h1: humidity9 = st.text_input("Humidity9am", value="")
         with h2: humidity3 = st.text_input("Humidity3pm", value="")
@@ -79,7 +79,7 @@ with st.form("form_datos_api"):
 
     submit_btn = st.form_submit_button("Consultar API")
 
-# --- LÓGICA DE ENVÍO A LA API ---
+#LÓGICA DE ENVÍO A LA API
 if submit_btn:
     datos_a_enviar = {
         "Date": str(fecha_input),
@@ -109,7 +109,7 @@ if submit_btn:
     try:
         with st.spinner('Consultando al Comité de IA (RF, HGB, NN)...'):
             # Nota: cambiamos la URL a /predict_all
-            respuesta = requests.post("http://127.0.0.1:8000/predict_all", json=datos_a_enviar)
+            respuesta = requests.post("http://127.0.0.1:8000/predecir_todo", json=datos_a_enviar)
             
         if respuesta.status_code == 200:
             data = respuesta.json()
@@ -117,9 +117,9 @@ if submit_btn:
             if "error" in data:
                 st.error(f"Error en API: {data['error']}")
             else:
-                # 1. RESULTADO PRINCIPAL (CONSENSO)
+                #RESULTADO PRINCIPAL (CONSENSO)
                 prob_cons = data["consenso"]["probabilidad"]
-                st.markdown("## 🔮 Resultado del Consenso")
+                st.markdown("## Resultado del Consenso")
                 
                 col_res, col_msg = st.columns([1, 2])
                 with col_res:
@@ -130,9 +130,9 @@ if submit_btn:
                     else:
                         st.success(f"☀️ **BUEN TIEMPO:** El consenso indica que no lloverá.")
 
-                # 2. DETALLE TÉCNICO (Lo que querías: ver cada uno)
+                # DETALLE TÉCNICO
                 st.markdown("---")
-                with st.expander("🔍 Ver opinión detallada de cada modelo"):
+                with st.expander("Ver opinión detallada de cada modelo"):
                     st.write("Aquí puedes ver qué 'pensó' cada algoritmo por separado:")
                     
                     detalles = data["detalle"]
@@ -148,10 +148,10 @@ if submit_btn:
                         st.progress(detalles["Gradient Boosting"])
                         st.write(f"**{detalles['Gradient Boosting']*100:.1f}%**")
                         
-                    #with c3:
-                        #st.info("🧠 Red Neuronal")
-                        #st.progress(detalles["Red Neuronal"])
-                        #st.write(f"**{detalles['Red Neuronal']*100:.1f}%**")
+                    with c3:
+                        st.info("🧠 Red Neuronal")
+                        st.progress(detalles["Red Neuronal"])
+                        st.write(f"**{detalles['Red Neuronal']*100:.1f}%**")
 
         else:
             st.error("Error de conexión con el servidor.")
