@@ -1,0 +1,27 @@
+# Servidor y API
+fastapi==0.115.8
+uvicorn==0.34.0
+pydantic==2.12.5
+requests==2.32.3
+
+# Ciencia de Datos y ML
+pandas==2.2.3
+numpy==1.26.4
+scikit-learn==1.6.1
+joblib==1.4.2
+scipy==1.15.3
+
+# Deep Learning (Versión CPU para Docker)
+tensorflow-cpu==2.10.1
+
+# Geoespacial (Crítico para tu AgregadorEspacial)
+geopandas==1.0.1
+shapely==2.0.7
+pyproj==3.7.1
+
+# Interfaz
+streamlit==1.42.0
+
+# Visualización (Opcional para la API, pero útil si el Pipeline genera gráficos)
+matplotlib==3.10.0
+seaborn==0.13.2
