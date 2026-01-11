@@ -1,11 +1,12 @@
 {
-    "learning_rate": 0.0006343056874655114,
-    "dropout_rate": 0.35455492111035936,
-    "batch_size": 128,
+    "learning_rate": 0.0007489536352529161,
+    "dropout_rate": 0.2502464123548377,
+    "batch_size": 256,
     "capas_ocultas": [
-        149,
-        118,
-        98
+        151,
+        139,
+        130,
+        101
     ],
     "use_batch_norm": true
 }
