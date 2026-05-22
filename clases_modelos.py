@@ -14,7 +14,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 class RedLluvia(BaseEstimator, ClassifierMixin):
     def __init__(self, learning_rate=0.001, epochs=100, batch_size=128,
                  capas_ocultas=[64, 32], dropout_rate=0.25, 
-                 use_batch_norm=True, # <--- NUEVO PARÁMETRO
+                 use_batch_norm=True,
                  random_state=42):
 
         self.learning_rate = learning_rate
@@ -22,7 +22,7 @@ class RedLluvia(BaseEstimator, ClassifierMixin):
         self.batch_size = batch_size
         self.capas_ocultas = capas_ocultas
         self.dropout_rate = dropout_rate
-        self.use_batch_norm = use_batch_norm # <--- Guardamos esto
+        self.use_batch_norm = use_batch_norm
         self.random_state = random_state
         
         # Estado interno
@@ -60,7 +60,7 @@ class RedLluvia(BaseEstimator, ClassifierMixin):
             epochs=self.epochs,
             batch_size=self.batch_size,
             validation_data=(X_val, y_val),
-            verbose=0, # Silencioso para producción
+            verbose=0,
             callbacks=[early_stopper, reduce_lr],
             class_weight=class_weights_dict
         )
@@ -68,7 +68,6 @@ class RedLluvia(BaseEstimator, ClassifierMixin):
         # Calcular umbral óptimo
         val_probs = self.model_.predict(X_val, verbose=0)
         precision, recall, thresholds = precision_recall_curve(y_val, val_probs)
-        # Evitar división por cero
         denominador = precision + recall
         f1_scores = np.divide(2 * precision * recall, denominador, out=np.zeros_like(precision), where=denominador!=0)
         
@@ -113,7 +112,7 @@ class RedLluvia(BaseEstimator, ClassifierMixin):
             else:
                 self.model_.add(layers.Dense(neuronas, use_bias=not self.use_batch_norm))
             
-            # 2. Batch Normalization (Tal cual lo hiciste en Optuna)
+            # 2. Batch Normalization
             if self.use_batch_norm:
                 self.model_.add(layers.BatchNormalization())
             
@@ -128,12 +127,10 @@ class RedLluvia(BaseEstimator, ClassifierMixin):
         
         optimizador = optimizers.Adam(learning_rate=self.learning_rate)
         
-        # OJO: En optuna usaste recall y precision en metrics, agrégalos aquí si quieres consistencia
         metrics = ['accuracy', tf.keras.metrics.Recall(name='recall'), tf.keras.metrics.Precision(name='precision')]
         
         self.model_.compile(optimizer=optimizador, loss='binary_crossentropy', metrics=metrics)
 
-    # --- SERIALIZACIÓN (NECESARIA PARA GUARDAR EL PIPELINE ENTRENADO) ---
     def __getstate__(self):
         state = self.__dict__.copy()
         if self.model_ is not None:
@@ -252,12 +249,11 @@ class RFClassifier(BaseEstimator, ClassifierMixin):
         self.classes_ = np.unique(y)
         
         # 2. Split interno (Solo para buscar el umbral, NO para early stopping)
-        # RF no necesita early stopping, pero sí necesitamos datos 'vírgenes' para el umbral
         X_train, X_val, y_train, y_val = train_test_split(
             X, y, test_size=0.2, stratify=y, random_state=self.random_state
         )
         
-        # 3. Instanciar el modelo oficial
+        # 3. Instanciar el modelo
         self.model_ = RandomForestClassifier(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,

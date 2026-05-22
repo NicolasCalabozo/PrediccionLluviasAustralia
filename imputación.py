@@ -181,7 +181,6 @@ class CodificadorCiclico(BaseEstimator, TransformerMixin):
 
         return X_copia
     
-    # --- CORRECCIÓN AQUÍ ---
     def get_feature_names_out(self, input_features=None):
         # Obtenemos los nombres de entrada
         if input_features is not None:
@@ -189,14 +188,13 @@ class CodificadorCiclico(BaseEstimator, TransformerMixin):
         elif hasattr(self, "feature_names_in_"):
             names = self.feature_names_in_
         else:
-            return None # O lanzar error
+            return None
             
         new_names = []
         for col in names:
-            # Agregamos las nuevas columnas que genera el transform
             new_names.append(f"{col}_sin")
             new_names.append(f"{col}_cos")
-            # Si NO borramos la original, también la incluimos (aunque tu default es True)
+            
             if not self.drop_original:
                 new_names.append(col)
                 
@@ -204,7 +202,7 @@ class CodificadorCiclico(BaseEstimator, TransformerMixin):
 
 
 def procesar_fechas(df):
-    # Es vital hacer una copia para no afectar el dataframe original fuera del pipe
+    # copia para no afectar el dataframe original
     X = df.copy()
     
     # Tu lógica de conversión
@@ -212,7 +210,7 @@ def procesar_fechas(df):
         X['Date'] = pd.to_datetime(X['Date'])
         X['Mes'] = X['Date'].dt.month
         
-        # Mapeo de Temporada (puedes traer tu diccionario aquí o tenerlo global)
+        # Mapeo de Temporada
         estaciones = {
             12: 'Verano', 1: 'Verano', 2: 'Verano',
             3: 'Otoño', 4: 'Otoño', 5: 'Otoño',
@@ -220,9 +218,6 @@ def procesar_fechas(df):
             9: 'Primavera', 10: 'Primavera', 11: 'Primavera'
         }
         X['Temporada'] = X['Mes'].apply(lambda x: estaciones.get(x))
-        
-        # Opcional: Eliminar la columna Date si ya no sirve
-        # X = X.drop(columns=['Date'])
         
     return X
 

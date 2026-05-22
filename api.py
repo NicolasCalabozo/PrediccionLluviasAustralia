@@ -44,7 +44,7 @@ class InputClima(BaseModel):
     Temp9am: Optional[str] = None
     Temp3pm: Optional[str] = None
 
-@app.post("/predecir_todo") # Cambiamos el nombre para reflejar que hace todo
+@app.post("/predecir_todo")
 def predecir_todo(datos: InputClima):
     input_dict = datos.dict()
     df_input = pd.DataFrame([input_dict])
